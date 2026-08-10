@@ -1,0 +1,12 @@
+# Normalize line endings to LF on add/checkout for everyone who clones — this
+# is the git-native, config-free way to enforce it. A Copybara round-trip
+# between two hosts is line-ending sensitive, so this must be identical on both
+# sides or every synced file shows as fully rewritten.
+* text=auto eol=lf
+
+# Compiled kernel artifacts and test data go through LFS: they are the payload
+# the mirror ships, and putting multi-MB SASS in ordinary git history would grow
+# both repos without bound. `-text` as well, so nothing rewrites their bytes.
+*.cubin filter=lfs diff=lfs merge=lfs -text
+*.npy filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text

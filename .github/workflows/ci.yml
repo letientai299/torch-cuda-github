@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 torch-cuda sandbox contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# Public-side gate. GitHub runners have no GPU, so this covers exactly what an
+# external contributor can be held to: the style hooks and the CPU test path.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  styles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # prek needs the merge base to diff against; a shallow clone has no
+          # common ancestor with the target branch.
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Cache prek hook environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/prek
+          key: prek-${{ runner.os }}-${{ hashFiles('prek.toml') }}
+      - run: pip install -r requirements-dev.txt
+      # --all-files, not the changed set: a Copybara-published commit can carry
+      # a tree that never passed the internal gate as a whole.
+      - run: prek run --all-files --show-diff-on-failure
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      # CPU wheel: the GPU-only deps (triton, cutlass-dsl, cuda-python) are not
+      # installable here and the ops fall back to eager without them.
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install pytest pytest-cov
+      - run: pip install --no-deps -e .
+      - run: pytest --cov=torch_cuda --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.xml

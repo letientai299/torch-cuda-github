@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 torch-cuda sandbox contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# Backstop on the public side. The sync's allowlist is the primary control and
+# gitleaks runs before the push, but both live in the internal repo — if either
+# is misconfigured, this is the last place the mistake is visible before it is
+# public. A finding here means the publish rules need fixing, not this file.
+name: public-hygiene
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  no-internal-references:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Reject internal hostnames and private paths
+        run: |
+          set -euo pipefail
+          # Kept as literal patterns rather than a config file so a PR that
+          # weakens the check is visible in this workflow's own diff.
+          patterns=(
+            'internal\.example'
+            'registry\.internal'
+            '/sandbox/[a-z-]*/internal'
+          )
+          failed=0
+          for pattern in "${patterns[@]}"; do
+            # This file necessarily contains every pattern it searches for.
+            if grep -rInE --exclude-dir=.git --exclude=public-hygiene.yml "$pattern" .; then
+              echo "::error::found internal reference matching /$pattern/"
+              failed=1
+            fi
+          done
+          exit "$failed"
+
+      - name: Reject private trees that should never be published
+        run: |
+          set -euo pipefail
+          failed=0
+          for path in .gitlab .gitlab-ci.yml docs/nv sync torch_cuda/dsl_kernels/cute; do
+            if [ -e "$path" ]; then
+              echo "::error::$path is internal-only but present in the public tree"
+              failed=1
+            fi
+          done
+          exit "$failed"

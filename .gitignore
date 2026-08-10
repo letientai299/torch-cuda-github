@@ -1,0 +1,32 @@
+__pycache__/
+*.egg-info/
+build/
+cpp/build*
+cpp/cmake-build-*
+compile_commands.json
+.venv/
+.python-version
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+
+# The .cubin files under cpp/kernels/*/cubins/ are committed via LFS — they are
+# the shipped artifact. The byte-array header built from them is generated into
+# the build tree on every build and is never committed.
+embedded_cubins.h
+
+# Built extension lands here at install time.
+torch_cuda/libs/*
+!torch_cuda/libs/__init__.py
+
+# Machine-specific tooling (contains tokens, auth state)
+.env
+.mcp.json
+.claude/
+.idea/
+.vscode/
+
+# Agent scratch space
+.ai.dump/

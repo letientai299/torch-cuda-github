@@ -1,0 +1,44 @@
+name: Bug report
+description: Something behaves differently than documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Numerical differences between backends are bugs. Include which backend
+        ran — `python -c "from torch_cuda.runtime import select_backend; print(select_backend())"`.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Observed behaviour, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Smallest script that shows the problem.
+      render: python
+    validations:
+      required: true
+
+  - type: input
+    id: backend
+    attributes:
+      label: Backend
+      description: Output of `select_backend()`.
+      placeholder: Backend.TRITON
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: GPU model, driver, CUDA, PyTorch, and `torch_cuda` versions.
+      render: shell
+    validations:
+      required: true

@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 torch-cuda sandbox contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# The squash-merge commit takes the PR title, so the title is what ends up in
+# history — and, once synced back, in the internal repo's history too.
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install commitizen
+      # Same `cz check` the commit-msg hook runs locally, against the config in
+      # pyproject.toml, so local and CI cannot disagree about what is valid.
+      - env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: cz check --message "$PR_TITLE"

@@ -1,0 +1,17 @@
+# CODEOWNERS — review routing on the public mirror.
+# Syntax: https://docs.github.com/articles/about-code-owners
+#
+# Owners must have WRITE access to route review; an entry that does not resolve
+# matches nothing and routes nobody, silently. A personal repo has no teams, so
+# these are user handles — switch to a team once the mirror moves to an org, and
+# re-check that auto-assignment still fires when a second member joins.
+#
+# The last matching rule wins.
+
+* @letientai299
+
+# The publish surface. A change to the workflows or to packaging can leak
+# internal content or break every external contributor at once.
+/.github/ @letientai299
+/pyproject.toml @letientai299
+/setup.py @letientai299
