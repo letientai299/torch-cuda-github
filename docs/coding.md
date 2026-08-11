@@ -49,3 +49,15 @@ Two trees are exempt, for reasons that are not style preferences:
 ## Sync test MR1
 
 One commit, allowlisted path only, merged without squash.
+
+### MR2 step 1
+
+Third-commit squash test, step 1.
+
+### MR2 step 2
+
+Third-commit squash test, step 2.
+
+### MR2 step 3
+
+Third-commit squash test, step 3.
