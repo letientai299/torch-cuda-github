@@ -77,3 +77,5 @@ Standard: c++14
 TabWidth: 4
 UseTab: Never
 ...
+
+# outbound coverage: touched so every published path has a real last-commit message

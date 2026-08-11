@@ -162,3 +162,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# outbound coverage: touched so every published path has a real last-commit message

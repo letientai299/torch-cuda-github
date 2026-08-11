@@ -49,3 +49,5 @@ Participation is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 [cc]: https://www.conventionalcommits.org/
 [dco]: https://developercertificate.org/
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

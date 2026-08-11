@@ -2,3 +2,5 @@ torch>=2.6
 triton==3.6.0
 nvidia-cutlass-dsl[cu13]==4.5.2
 cuda-python>=13
+
+# outbound coverage: touched so every published path has a real last-commit message

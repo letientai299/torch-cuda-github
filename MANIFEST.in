@@ -3,3 +3,5 @@ recursive-include cpp CMakeLists.txt *.cmake *.cpp *.cu *.h *.cuh *.py
 # fetched nanobind sources.
 prune cpp/build*
 prune cpp/cmake-build-*
+
+# outbound coverage: touched so every published path has a real last-commit message

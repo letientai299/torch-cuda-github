@@ -53,3 +53,6 @@ def test_accelerated_backend_matches_eager():
     b = torch.randn(4096, device="cuda")
     assert select_backend() is not Backend.EAGER
     torch.testing.assert_close(vector_add(a, b), vector_add(a, b, backend=Backend.EAGER))
+
+
+# outbound coverage: touched so every published path has a real last-commit message

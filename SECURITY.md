@@ -14,3 +14,5 @@ If you find something anyway, open a private report through
 a public issue.
 
 [ghsa]: https://docs.github.com/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

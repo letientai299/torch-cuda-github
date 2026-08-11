@@ -12,3 +12,5 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(cmake/deps.cmake)
 
 add_subdirectory(kernels)
+
+# outbound coverage: touched so every published path has a real last-commit message

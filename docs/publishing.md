@@ -86,3 +86,5 @@ idempotent and does not replay what it already sent.
 ## MR3 public note
 
 Allowlisted half of a mixed commit.
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

@@ -11,3 +11,5 @@ first and last are meant to reach the public mirror.
 from torch_cuda.ops import fused_scale_add, vector_add
 
 __all__ = ["fused_scale_add", "vector_add"]
+
+# outbound coverage: touched so every published path has a real last-commit message

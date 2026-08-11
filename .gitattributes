@@ -10,3 +10,5 @@
 *.cubin filter=lfs diff=lfs merge=lfs -text
 *.npy filter=lfs diff=lfs merge=lfs -text
 *.pt filter=lfs diff=lfs merge=lfs -text
+
+# outbound coverage: touched so every published path has a real last-commit message

@@ -1,3 +1,5 @@
 prek==0.4.12  # hook runner — `prek install`. See prek.toml.
 pytest>=9.0.3  # <9.0.3: PYSEC-2026-1845 (tmpdir symlink)
 pytest-cov>=7.1.0  # coverage reporting; pulls coverage[toml] (the `coverage` CLI)
+
+# outbound coverage: touched so every published path has a real last-commit message

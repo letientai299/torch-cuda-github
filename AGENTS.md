@@ -22,3 +22,5 @@ not the point; the publish boundary is. Prefer a change that makes a sync
 scenario testable over one that makes an op faster.
 
 [coding]: docs/coding.md
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

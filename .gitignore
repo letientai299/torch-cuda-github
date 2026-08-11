@@ -30,3 +30,5 @@ torch_cuda/libs/*
 
 # Agent scratch space
 .ai.dump/
+
+# outbound coverage: touched so every published path has a real last-commit message

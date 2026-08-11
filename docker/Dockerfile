@@ -22,3 +22,5 @@ ENV TORCH_CUDA_BUILD_KERNELS=${TORCH_CUDA_BUILD_KERNELS}
 RUN pip install --no-cache-dir -e .
 
 CMD ["pytest"]
+
+# outbound coverage: touched so every published path has a real last-commit message

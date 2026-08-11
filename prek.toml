@@ -99,3 +99,5 @@ rev = "v4.17.0"
 hooks = [
   { id = "commitizen" },
 ]
+
+# outbound coverage: touched so every published path has a real last-commit message

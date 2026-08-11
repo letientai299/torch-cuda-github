@@ -58,3 +58,5 @@ Style is enforced by [prek][prek]; install the hooks once with
 [nanobind]: https://nanobind.readthedocs.io/
 [prek]: https://github.com/j178/prek
 [triton]: https://triton-lang.org/
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

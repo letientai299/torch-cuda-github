@@ -1,3 +1,5 @@
 [submodule "3rdparty/cuequivariance"]
 	path = 3rdparty/cuequivariance
 	url = https://github.com/NVIDIA/cuequivariance.git
+
+# outbound coverage: touched so every published path has a real last-commit message

@@ -76,3 +76,5 @@ setup(
     ext_modules=[Extension(f"torch_cuda.libs.{KERNEL_LIBRARY_STEM}", sources=[])] if build_kernels_requested() else [],
     cmdclass={"build_ext": CMakeBuild} if build_kernels_requested() else {},
 )
+
+# outbound coverage: touched so every published path has a real last-commit message

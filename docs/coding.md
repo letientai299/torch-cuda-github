@@ -61,3 +61,5 @@ Third-commit squash test, step 2.
 ### MR2 step 3
 
 Third-commit squash test, step 3.
+
+<!-- outbound coverage: touched so every published path has a real last-commit message -->

@@ -124,3 +124,5 @@ markers = [
 [tool.commitizen]
 # Conventional Commits. Used to lint commit/MR/PR titles (`cz check`).
 name = "cz_conventional_commits"
+
+# outbound coverage: touched so every published path has a real last-commit message
