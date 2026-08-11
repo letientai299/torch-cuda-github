@@ -1,0 +1,3 @@
+[submodule "3rdparty/cuequivariance"]
+	path = 3rdparty/cuequivariance
+	url = https://github.com/NVIDIA/cuequivariance.git

@@ -6,19 +6,19 @@ published, so a new top-level directory is private by default.
 
 ## The boundary
 
-| Tree                             | Published | Why                                                                             |
-| -------------------------------- | --------- | ------------------------------------------------------------------------------- |
-| `torch_cuda/ops/`                | yes       | The API consumers call                                                          |
-| `torch_cuda/runtime/`            | yes       | Selects the backend; needed to interpret a bug report                           |
-| `torch_cuda/dsl_kernels/triton/` | yes       | Generic fusions, no differentiating IP; JIT-compiled, so the source must ship   |
-| `torch_cuda/dsl_kernels/cute/`   | no        | The kernel IP. Consumers get the compiled SASS instead                          |
-| `cpp/kernels/*/cubins/*.cubin`   | yes       | The compiled SASS (LFS) — the artifact that replaces the withheld sources       |
-| `cpp/` (rest)                    | yes       | Loader and bindings; without them the CUBINs are unusable                       |
-| `.github/`                       | yes       | Only meaningful on the mirror, but authored here                                |
-| `3rdparty/`, `.gitmodules`       | no        | Copybara cannot reproduce a gitlink; publishing one without the other misleads  |
-| `.gitlab/`, `.gitlab-ci.yml`     | no        | Internal runners, registries, and credentials                                   |
-| `docs/nv/`                       | no        | Internal notes; nested inside a published tree, so it needs an explicit exclude |
-| `sync/`                          | no        | The publish tooling itself                                                      |
+| Tree                             | Published | Why                                                                              |
+| -------------------------------- | --------- | -------------------------------------------------------------------------------- |
+| `torch_cuda/ops/`                | yes       | The API consumers call                                                           |
+| `torch_cuda/runtime/`            | yes       | Selects the backend; needed to interpret a bug report                            |
+| `torch_cuda/dsl_kernels/triton/` | yes       | Generic fusions, no differentiating IP; JIT-compiled, so the source must ship    |
+| `torch_cuda/dsl_kernels/cute/`   | no        | The kernel IP. Consumers get the compiled SASS instead                           |
+| `cpp/kernels/*/cubins/*.cubin`   | yes       | The compiled SASS (LFS) — the artifact that replaces the withheld sources        |
+| `cpp/` (rest)                    | yes       | Loader and bindings; without them the CUBINs are unusable                        |
+| `.github/`                       | yes       | Only meaningful on the mirror, but authored here                                 |
+| `3rdparty/`, `.gitmodules`       | yes       | Public upstreams as gitlinks; the sync restores them, Copybara cannot carry them |
+| `.gitlab/`, `.gitlab-ci.yml`     | no        | Internal runners, registries, and credentials                                    |
+| `docs/nv/`                       | no        | Internal notes; nested inside a published tree, so it needs an explicit exclude  |
+| `sync/`                          | no        | The publish tooling itself                                                       |
 
 `docs/nv/` is the one case that needs an exclude entry rather than simply being
 unlisted: everything else private is a top-level path the allowlist never names.
