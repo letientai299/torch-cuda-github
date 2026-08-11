@@ -23,6 +23,19 @@ published, so a new top-level directory is private by default.
 `docs/nv/` is the one case that needs an exclude entry rather than simply being
 unlisted: everything else private is a top-level path the allowlist never names.
 
+## Crossing is one-way
+
+The table says what is published from now on. It does not say what is public.
+Moving a path from the published side to the private side removes it from the
+mirror's tip and nothing more -- every commit that already carried it is still
+on a public repository that has been cloneable since it was pushed.
+
+This matters because reclassifying a path is the natural reaction to publishing
+something by mistake, and it produces a clean, green sync while the content
+stays in public history. It is not a remedy. The remedies are rewriting public
+history, on the assumption the content was already fetched, or accepting that it
+is out. Treat the allowlist as a gate that only ever opens.
+
 ## The boundary runs through `dsl_kernels/`, not around it
 
 `triton/` ships and `cute/` does not, yet both are "kernel sources" under the
