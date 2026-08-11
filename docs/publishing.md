@@ -15,6 +15,7 @@ published, so a new top-level directory is private by default.
 | `cpp/kernels/*/cubins/*.cubin`   | yes       | The compiled SASS (LFS) — the artifact that replaces the withheld sources       |
 | `cpp/` (rest)                    | yes       | Loader and bindings; without them the CUBINs are unusable                       |
 | `.github/`                       | yes       | Only meaningful on the mirror, but authored here                                |
+| `3rdparty/`                      | yes       | Public upstreams, published as gitlinks; consumers recurse from `.gitmodules`   |
 | `.gitlab/`, `.gitlab-ci.yml`     | no        | Internal runners, registries, and credentials                                   |
 | `docs/nv/`                       | no        | Internal notes; nested inside a published tree, so it needs an explicit exclude |
 | `sync/`                          | no        | The publish tooling itself                                                      |
