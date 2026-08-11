@@ -45,3 +45,7 @@ Two trees are exempt, for reasons that are not style preferences:
 [rumdl]: https://github.com/rvben/rumdl
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
+
+## Sync test MR1
+
+One commit, allowlisted path only, merged without squash.
