@@ -82,3 +82,7 @@ Three layers, in order:
 Contributions arriving as GitHub PRs come back to this repo. A published commit
 carries a `GitOrigin-RevId` trailer so re-running the outbound sync is
 idempotent and does not replay what it already sent.
+
+## MR3 public note
+
+Allowlisted half of a mixed commit.
