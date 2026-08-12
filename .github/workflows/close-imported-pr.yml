@@ -13,12 +13,17 @@
 # commit, links it, and thanks the contributor by name rather than reading like
 # a bot closing a ticket.
 #
-# How the link survives: the import titles the internal merge request
-# `GitHub PR #<n>: ...`, this project sets `merge_commit_template` to
-# `%{title}`, and Copybara replays the merge commit verbatim. So the marker
-# rides in the subject line through all three hops, and nothing has to be looked
-# up in an internal system. Hand-editing an imported merge request's title
-# breaks exactly this.
+# How the link survives: the import puts a `GitHub-PR:` trailer in the merge
+# request's description, `merge_commit_template` carries `%{description}` into
+# the merge commit, and Copybara replays that message verbatim. So the trailer
+# rides in the body through all three hops and nothing has to be looked up in an
+# internal system.
+#
+# A trailer rather than a subject-line prefix, deliberately. The subject belongs
+# to the contributor and should say what the change does — it is the line that
+# ends up in `git log` here and in every changelog generated from it. A trailer
+# is also unambiguous: a contributor who writes "fix the GitHub PR #12 typo" as
+# their own title cannot make this workflow close pull request 12.
 #
 # No stored credential: GITHUB_TOKEN already has write access inside this
 # repository, which is why the closing happens here and not on the side that
@@ -62,8 +67,12 @@ jobs:
           fi
 
           # shellcheck disable=SC2086
-          git log --format='%H %s' $range | while read -r sha subject; do
-            number=$(printf '%s' "$subject" | sed -nE 's/^GitHub PR #([0-9]+):.*/\1/p')
+          for sha in $(git log --format='%H' $range); do
+            # The trailer, from the body. `git log --format=%(trailers:...)`
+            # would be tidier but only sees trailers git itself recognises as a
+            # block; a grep over the message is what survives Copybara having
+            # appended its own GitOrigin-RevId line after ours.
+            number=$(git log -1 --format='%B' "$sha" | sed -nE 's/^GitHub-PR:[[:space:]]*#?([0-9]+)[[:space:]]*$/\1/p' | head -1)
             [ -n "$number" ] || continue
 
             state=$(gh pr view "$number" --json state --jq .state 2>/dev/null || echo MISSING)
