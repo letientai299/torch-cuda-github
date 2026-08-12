@@ -16,7 +16,10 @@ from torch_cuda.runtime import Backend, select_backend
 
 
 def vector_add(a: torch.Tensor, b: torch.Tensor, *, backend: Backend | None = None) -> torch.Tensor:
-    """Return ``a + b``, computed by the highest-preference available backend."""
+    """Return ``a + b``, computed by the highest-preference available backend.
+
+    Both operands must share shape, dtype, and be contiguous.
+    """
     _check_operands(a, b)
     resolved = select_backend(backend, device=a.device)
 
