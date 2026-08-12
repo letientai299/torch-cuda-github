@@ -43,6 +43,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Without this the runner gets `tests/data/vector_add_golden.pt` as a
+          # pointer file, and `test_golden_file_is_not_an_unfetched_lfs_pointer`
+          # fires on every branch — including `main`. That canary exists to
+          # catch a publish that replayed commits without pushing the objects,
+          # and a canary that is always red cannot report the thing it is for.
+          # Measured: the object is on the mirror (the publish verifies it
+          # through the LFS Batch API); only the checkout was missing it.
+          lfs: true
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
