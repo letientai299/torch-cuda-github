@@ -44,3 +44,7 @@ def _check_operands(a: torch.Tensor, b: torch.Tensor) -> None:
     # wrong elements rather than fail loudly.
     if not (a.is_contiguous() and b.is_contiguous()):
         raise ValueError("both operands must be contiguous")
+
+
+def  _e2e_style_probe( x ,y ):
+    return   x+y
