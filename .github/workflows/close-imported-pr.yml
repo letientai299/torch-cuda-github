@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 torch-cuda sandbox contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# The end of an imported contribution. The change was merged internally and has
+# just been replayed onto this mirror by the outbound publish; this workflow
+# works out which pull request it came from, says where it landed, and closes
+# the pull request.
+#
+# GitHub will show that pull request as closed rather than merged, and the
+# contributor gets no merged-pull-request entry on their profile. That cost was
+# accepted deliberately (q4 #1) and every GitLab-first project surveyed pays it.
+# This comment is the entire compensation, which is why it names the published
+# commit, links it, and thanks the contributor by name rather than reading like
+# a bot closing a ticket.
+#
+# How the link survives: the import titles the internal merge request
+# `GitHub PR #<n>: ...`, this project sets `merge_commit_template` to
+# `%{title}`, and Copybara replays the merge commit verbatim. So the marker
+# rides in the subject line through all three hops, and nothing has to be looked
+# up in an internal system. Hand-editing an imported merge request's title
+# breaks exactly this.
+#
+# No stored credential: GITHUB_TOKEN already has write access inside this
+# repository, which is why the closing happens here and not on the side that
+# knows the published SHA first.
+name: close-imported-pr
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The push range, not just the tip: one publish can replay several
+          # merges, and a missed one leaves a pull request open forever with no
+          # sign anything happened.
+          fetch-depth: 0
+
+      - name: Close the pull requests this push published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          REPO_URL: ${{ github.event.repository.html_url }}
+        run: |
+          set -euo pipefail
+          # A first push, or a force-push, has no usable lower bound; look at the
+          # tip alone rather than walking the whole history and reopening old
+          # ground.
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            range="-1 $AFTER"
+          else
+            range="$BEFORE..$AFTER"
+          fi
+
+          # shellcheck disable=SC2086
+          git log --format='%H %s' $range | while read -r sha subject; do
+            number=$(printf '%s' "$subject" | sed -nE 's/^GitHub PR #([0-9]+):.*/\1/p')
+            [ -n "$number" ] || continue
+
+            state=$(gh pr view "$number" --json state --jq .state 2>/dev/null || echo MISSING)
+            if [ "$state" != "OPEN" ]; then
+              echo "PR #$number is $state; nothing to close"
+              continue
+            fi
+            author=$(gh pr view "$number" --json author --jq .author.login)
+
+            gh pr comment "$number" --body "$(cat <<EOF
+          Thank you, @$author.
+
+          This landed as [\`${sha:0:12}\`]($REPO_URL/commit/$sha) on \`main\`, with you as the commit author.
+
+          Development happens in an internal repository and this mirror is published from it, so the change was merged there and replayed here. That is why this pull request closes rather than merges — the code is in, even though GitHub cannot show it that way.
+          EOF
+          )"
+            gh pr close "$number"
+            echo "closed PR #$number for $sha"
+          done

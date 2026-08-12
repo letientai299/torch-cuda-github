@@ -44,8 +44,15 @@ the `backend=` argument or `TORCH_CUDA_BACKEND=eager|triton|cubin`.
 
 ## Layout
 
-Where things live and, more importantly, which side of the publish boundary they
-sit on: see [docs/publishing.md](docs/publishing.md).
+`torch_cuda/` is the Python package — `ops/` is the API, `runtime/` resolves
+which implementation runs, and `dsl_kernels/triton/` holds the Triton kernels.
+`cpp/` is the CMake build, the nanobind extension, and the compiled CUBINs it
+loads. Tests are in `tests/`, examples in `examples/`.
+
+This repository is a published mirror: development happens internally and the
+public tree is a filtered copy, so some kernels ship compiled rather than as
+source. [CONTRIBUTING.md](CONTRIBUTING.md) covers what that means for a pull
+request.
 
 ## Contributing
 

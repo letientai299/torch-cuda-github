@@ -1,5 +1,25 @@
 # Contributing
 
+## How a change reaches this repository
+
+Development happens in an internal repository, and this one is published from
+it. Your pull request is reviewed here, then **imported** and merged internally,
+and the merged change is replayed back onto this mirror.
+
+The practical consequences, all of them worth knowing before you start:
+
+- A maintainer starts the import once your pull request is approved and the
+  checks are green. You do not need to ask for it in a comment.
+- The internal test suite runs against production hardware that the public CI
+  here does not have. If it fails, a maintainer will tell you what failed.
+- **Your pull request will be closed, not merged.** GitHub cannot show a merge
+  that happened somewhere else. You stay the author of the commit, and a comment
+  on your pull request will link the commit once it appears on `main`.
+- Not everything in the internal repository is published here, and a pull
+  request that reaches into a path this mirror does not carry cannot be
+  imported. If that happens the import is refused and a maintainer will explain
+  what to do — it is not something you can diagnose from here.
+
 ## Developer Certificate of Origin
 
 Every commit must be signed off. `git commit -s` appends the trailer:
@@ -10,6 +30,13 @@ Signed-off-by: Your Name <your.email@example.com>
 
 The sign-off certifies that you wrote the patch or otherwise have the right to
 submit it under this project's licence. See [developercertificate.org][dco].
+
+Every commit is checked, not just the last one, and the check is required before
+a pull request can be imported. To sign off commits you have already made:
+
+```sh
+git rebase --signoff origin/main
+```
 
 ## Before you open a PR
 
@@ -25,16 +52,17 @@ pytest
 
 ## PR titles
 
-The title becomes the squash-merge commit message, so it must be a valid
-[Conventional Commit][cc]: `feat: `, `fix: `, `docs: `, `style: `, `refactor: `,
-`perf: `, `test: `, `build: `, `ci: `, `chore: `, `revert: `.
+The title survives the import and becomes the subject of the commit that lands,
+so it must be a valid [Conventional Commit][cc]: `feat: `, `fix: `, `docs: `,
+`style: `, `refactor: `, `perf: `, `test: `, `build: `, `ci: `, `chore: `,
+`revert: `.
 
 ## What CI can and cannot check
 
-GitHub runners have no GPU. CI covers the style gate and the eager code path
-only; anything touching a kernel is reviewed by hand and validated on internal
-hardware. Say so in the PR description when your change is GPU-only, and include
-the numbers you measured.
+GitHub runners here have no GPU, so the checks on your pull request cover the
+style gate and the eager code path only. Anything touching a kernel is exercised
+after the import, on internal hardware. Say so in the PR description when your
+change is GPU-only, and include the numbers you measured.
 
 ## Kernel changes
 
