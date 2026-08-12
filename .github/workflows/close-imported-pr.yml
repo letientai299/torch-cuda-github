@@ -6,6 +6,14 @@
 # works out which pull request it came from, says where it landed, and closes
 # the pull request.
 #
+# The comment deliberately does NOT claim the contributor authored the published
+# commit. Measured end to end: with `merge_method: merge` on the internal
+# project, Copybara follows first parent and so replays the MERGE commit, whose
+# author is whoever merged. The contributor's authorship survives on the
+# internal side and dies at the merge. `merge_method: ff` or `rebase_merge`
+# would publish their commit directly -- until that is set, saying "with you as
+# the commit author" here would be false.
+#
 # GitHub will show that pull request as closed rather than merged, and the
 # contributor gets no merged-pull-request entry on their profile. That cost was
 # accepted deliberately (q4 #1) and every GitLab-first project surveyed pays it.
@@ -85,7 +93,7 @@ jobs:
             gh pr comment "$number" --body "$(cat <<EOF
           Thank you, @$author.
 
-          This landed as [\`${sha:0:12}\`]($REPO_URL/commit/$sha) on \`main\`, with you as the commit author.
+          This landed as [\`${sha:0:12}\`]($REPO_URL/commit/$sha) on \`main\`.
 
           Development happens in an internal repository and this mirror is published from it, so the change was merged there and replayed here. That is why this pull request closes rather than merges — the code is in, even though GitHub cannot show it that way.
           EOF
