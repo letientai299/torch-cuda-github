@@ -67,3 +67,5 @@ Style is enforced by [prek][prek]; install the hooks once with
 [triton]: https://triton-lang.org/
 
 <!-- outbound coverage: touched so every published path has a real last-commit message -->
+
+<!-- e2e bad-title scenario marker -->
