@@ -83,3 +83,5 @@ Third-commit squash test, step 3.
 <!-- o13 catch-up probe -->
 
 <!-- a4: internal change published over a mirror-side commit -->
+
+<!-- h2: an innocent commit made after the leak -->
