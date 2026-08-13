@@ -65,3 +65,5 @@ Third-commit squash test, step 3.
 <!-- outbound coverage: touched so every published path has a real last-commit message -->
 
 <!-- outbound 7: ticket key in the published subject -->
+
+<!-- i16: unsigned -->
