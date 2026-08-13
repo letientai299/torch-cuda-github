@@ -5,6 +5,16 @@
 # gitleaks runs before the push, but both live in the internal repo — if either
 # is misconfigured, this is the last place the mistake is visible before it is
 # public. A finding here means the publish rules need fixing, not this file.
+#
+# What this file may check is constrained by where it lives. It is published, so
+# every pattern in it is public, and a check phrased as "these trees must not
+# appear" would publish the list of withheld trees — including the one that
+# matters most, which is nested inside a published tree rather than beside it.
+# That check therefore runs on the internal side, at publish time, where the
+# allowlist already is: repo_sync.outbound.check_published_tree() asks the same
+# question of every produced path and refuses the push. The patterns that remain
+# here are ones whose disclosure costs nothing: an internal hostname is a leak
+# whether or not a grep for it is public.
 name: public-hygiene
 
 on:
@@ -36,18 +46,6 @@ jobs:
             # This file necessarily contains every pattern it searches for.
             if grep -rInE --exclude-dir=.git --exclude=public-hygiene.yml "$pattern" .; then
               echo "::error::found internal reference matching /$pattern/"
-              failed=1
-            fi
-          done
-          exit "$failed"
-
-      - name: Reject private trees that should never be published
-        run: |
-          set -euo pipefail
-          failed=0
-          for path in .gitlab .gitlab-ci.yml docs/nv sync torch_cuda/dsl_kernels/cute; do
-            if [ -e "$path" ]; then
-              echo "::error::$path is internal-only but present in the public tree"
               failed=1
             fi
           done
