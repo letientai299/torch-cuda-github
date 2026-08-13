@@ -77,3 +77,5 @@ Third-commit squash test, step 3.
 <!-- o2 commit 2 -->
 
 <!-- o2 commit 3 -->
+
+<!-- o1: a single-commit change on a published path -->
