@@ -21,11 +21,17 @@
 # commit, links it, and thanks the contributor by name rather than reading like
 # a bot closing a ticket.
 #
-# How the link survives: the import puts a `GitHub-PR:` trailer in the merge
-# request's description, `merge_commit_template` carries `%{description}` into
-# the merge commit, and Copybara replays that message verbatim. So the trailer
-# rides in the body through all three hops and nothing has to be looked up in an
-# internal system.
+# How the link survives: the import writes a `GitHub-PR:` trailer into the
+# imported commit's own message, `merge_commit_template` carries `%{description}`
+# into the merge commit, and Copybara replays that message verbatim. So the
+# trailer rides in the body through all three hops and nothing has to be looked
+# up in an internal system.
+#
+# The trailer is on the commit rather than in the merge request description
+# because a description is transmitted as a git push option, and git rejects the
+# whole push if one contains a newline. Measured against a real GitLab remote: a
+# multi-line description did not produce a worse merge request, it imported
+# nothing at all.
 #
 # A trailer rather than a subject-line prefix, deliberately. The subject belongs
 # to the contributor and should say what the change does — it is the line that

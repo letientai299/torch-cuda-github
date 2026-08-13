@@ -8,10 +8,18 @@ and the merged change is replayed back onto this mirror.
 
 The practical consequences, all of them worth knowing before you start:
 
-- A maintainer starts the import once your pull request is approved and the
-  checks are green. You do not need to ask for it in a comment.
+- A maintainer queues the import once your pull request is approved and the
+  checks are green. You do not need to ask for it in a comment. Queuing is
+  visible: your pull request gets an `import-approved` label and a comment
+  saying so.
+- **Queuing is the last automatic message you will get until the change lands.**
+  The internal side cannot write to GitHub, so it cannot report progress here.
+  Silence after the label means the change is still in the queue, not that
+  something went wrong. If the import cannot proceed, a maintainer comments.
 - The internal test suite runs against production hardware that the public CI
   here does not have. If it fails, a maintainer will tell you what failed.
+- Pushing a new commit after the label is applied means the import waits for a
+  fresh approval: approvals are pinned to the exact commit they reviewed.
 - **Your pull request will be closed, not merged.** GitHub cannot show a merge
   that happened somewhere else. You stay the author of the commit, and a comment
   on your pull request will link the commit once it appears on `main`.

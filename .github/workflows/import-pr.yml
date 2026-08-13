@@ -3,35 +3,40 @@
 
 # A maintainer asks for a pull request to be imported and tested internally.
 #
-# This workflow can ASK, never authorize. It holds a trigger token that starts
-# one pipeline and a read token that watches it; whether the import happens is
-# decided on the internal side, by Copybara, against this repository's own
-# record of who approved which commit and whether the public checks are green.
-# Handing this workflow the power to approve would move the trust boundary onto
-# the public side, which is the one thing the whole design is arranged to avoid.
+# This workflow can ASK, never authorize. Asking is now the whole of it: it
+# applies a label and says so on the pull request. Nothing here talks to the
+# internal side, because nothing here can.
 #
-# It polls rather than firing and forgetting because it is also the only thing
-# that can speak to the contributor: no GitHub write credential exists on the
-# internal side, so the outcome has to be written back from here, with the
-# repository's own GITHUB_TOKEN.
+# WHY IT NO LONGER TRIGGERS ANYTHING. The design had this workflow fire a GitLab
+# pipeline trigger. Run for real, with the trigger token and the project API URL
+# in place as repository secrets, it fails at the network with
+# `curl: (6) Could not resolve host` -- the host deliberately not named here,
+# because this file is published and an internal hostname is exactly what the
+# publish gate exists to keep off the mirror. (It was named here once. gitleaks
+# refused the publish, which is the system working.)
 #
-# What the outcome comment says is deliberately thin. A refused import has a
-# reason — most often a path the mirror does not publish — and that reason names
-# an exclusion, so it stays in the internal log and a maintainer explains it by
-# hand. Distinguishing "refused" from "broke" publicly would leak the same thing
-# more slowly.
+# That is structural rather than a misconfiguration. GitHub's hosted runners sit
+# on the public internet; the internal GitLab is neither resolvable nor routable
+# from there, and no credential arrangement changes it. So the start signal is
+# inverted: an internal scheduled pipeline polls api.github.com for pull requests
+# carrying the label this workflow applies, which is reachability the flow
+# already depends on and which was measured working from a real GitLab runner.
+# See .gitlab/ci/inbound-import.yml and sync/src/repo_sync/poll.py.
 #
-# workflow_dispatch rather than a comment trigger: the workflow that runs is
-# always this file on the default branch, never a copy from the pull request,
-# and only accounts with write access can start it. That is the same trust
-# boundary copy-pr-bot draws with `/ok to test`.
+# WHAT THAT COSTS, AND WHY THE COMMENT BELOW IS WORDED AS IT IS. The old version
+# polled the pipeline and reported the outcome back here. Nothing can do that
+# now: no GitHub write credential exists on the internal side, which is a
+# property of the design rather than an oversight, and this workflow's run is
+# over long before the import happens. A successful import still reaches the
+# contributor -- close-imported-pr.yml comments and closes when the change lands
+# -- but a refusal is silent publicly and a maintainer explains it by hand. The
+# comment therefore promises only what the machinery can actually deliver.
 #
-# Repository secrets:
-#   GITLAB_PROJECT_API   Base API URL of the internal project, e.g.
-#                        https://<host>/api/v4/projects/<id>. A secret so the
-#                        internal host is not published in this file.
-#   GITLAB_TRIGGER_TOKEN Pipeline trigger token, scoped to that one project.
-#   GITLAB_READ_TOKEN    Read-only token used only to poll pipeline status.
+# workflow_dispatch rather than a comment trigger: only accounts with write
+# access can start it, which is the same trust boundary copy-pr-bot draws with
+# `/ok to test`. The label carries no authority of its own -- the import gate
+# re-reads approval and check status from GitHub before fetching anything -- but
+# a label anyone could apply would still let anyone queue internal work.
 name: import-pr
 
 on:
@@ -47,21 +52,26 @@ permissions:
   pull-requests: write
 
 concurrency:
-  # Never cancel: a cancelled poll leaves an import running internally with
-  # nothing left to report its result onto the pull request.
   group: import-pr-${{ inputs.pr }}
   cancel-in-progress: false
 
 jobs:
-  import:
+  request:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
     # This workflow checks nothing out -- it needs no source, only the API. So
     # `gh` has no git remote to infer the repository from and fails with
     # "not a git repository" unless it is told. Measured: the first real run
     # died on exactly that.
     env:
       GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ inputs.pr }}
+      # Must match INBOUND_LABEL in sync/copy.bara.sky, which is where the
+      # internal poll reads it from. Two copies, because the internal file is
+      # not published; a mismatch means labelled pull requests are never picked
+      # up, which is why the poll logs how many it found.
+      LABEL: import-approved
     steps:
       - name: Refuse to run from anything but the default branch
         if: github.ref_name != github.event.repository.default_branch
@@ -69,119 +79,32 @@ jobs:
           echo "::error::run this from ${{ github.event.repository.default_branch }}"
           exit 1
 
-      - name: Read the pull request
-        id: pr
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ inputs.pr }}
+      - name: Check the pull request is open
         run: |
           set -euo pipefail
           case "$PR" in
             ''|*[!0-9]*) echo "::error::pull request number must be digits"; exit 1 ;;
           esac
-          gh pr view "$PR" --json state,title,url,headRefOid,headRepository,headRepositoryOwner > pr.json
-          state=$(jq -r .state pr.json)
+          state=$(gh pr view "$PR" --json state --jq .state)
           if [ "$state" != "OPEN" ]; then
             echo "::error::PR #$PR is $state"
             exit 1
           fi
-          # The file list is GitHub's own answer about its own pull request, and
-          # the internal side cannot obtain it: the import can only observe what
-          # Copybara chose to write. Sent so the path gate has a second source
-          # that a silently dropped file cannot hide from.
-          gh pr diff "$PR" --name-only > files.txt
 
-          # A random heredoc delimiter, because the title and the file names are
-          # written by whoever opened the pull request. With a fixed `EOF` a
-          # title containing a lone `EOF` line closes the block early and every
-          # line after it is parsed as another step output — which is a
-          # contributor setting `head_repo` to a repository of their choosing.
-          delim="EOF_$(openssl rand -hex 16)"
-          {
-            echo "title<<$delim"; jq -r .title pr.json; echo "$delim"
-            echo "url=$(jq -r .url pr.json)"
-            echo "head_sha=$(jq -r .headRefOid pr.json)"
-            echo "head_repo=https://github.com/$(jq -r .headRepositoryOwner.login pr.json)/$(jq -r .headRepository.name pr.json).git"
-            echo "paths<<$delim"; cat files.txt; echo "$delim"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Start the internal import pipeline
-        id: trigger
-        env:
-          PROJECT_API: ${{ secrets.GITLAB_PROJECT_API }}
-          TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
-          PR: ${{ inputs.pr }}
-          PR_TITLE: ${{ steps.pr.outputs.title }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-          PR_HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
-          PR_HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
-          PR_PATHS: ${{ steps.pr.outputs.paths }}
+      - name: Label it for import
         run: |
           set -euo pipefail
-          # --form-string, never --form: it sends each value literally, so a
-          # title beginning `@` or `<` is a title rather than a filename curl
-          # reads. Every one of these is contributor-influenced, and the
-          # internal side validates each again before using it.
-          curl --silent --show-error --fail-with-body \
-            --request POST "$PROJECT_API/trigger/pipeline" \
-            --form-string "token=$TRIGGER_TOKEN" \
-            --form-string "ref=${{ github.event.repository.default_branch }}" \
-            --form-string "variables[SYNC_PR_NUMBER]=$PR" \
-            --form-string "variables[SYNC_PR_TITLE]=$PR_TITLE" \
-            --form-string "variables[SYNC_PR_URL]=$PR_URL" \
-            --form-string "variables[SYNC_PR_HEAD_SHA]=$PR_HEAD_SHA" \
-            --form-string "variables[SYNC_PR_HEAD_REPO_URL]=$PR_HEAD_REPO" \
-            --form-string "variables[SYNC_PR_PATHS]=$PR_PATHS" \
-            --output pipeline.json
-          echo "id=$(jq -r .id pipeline.json)" >> "$GITHUB_OUTPUT"
+          # --force so a label that does not exist yet is created rather than
+          # failing the run on a fresh repository.
+          gh label create "$LABEL" --description "Queued for internal import" --color 0E8A16 --force
+          gh pr edit "$PR" --add-label "$LABEL"
 
-      - name: Wait for it
-        id: poll
-        env:
-          PROJECT_API: ${{ secrets.GITLAB_PROJECT_API }}
-          READ_TOKEN: ${{ secrets.GITLAB_READ_TOKEN }}
-          PIPELINE: ${{ steps.trigger.outputs.id }}
+      - name: Say what happens next
         run: |
           set -euo pipefail
-          # Status only, never job output: an internal log can name the path an
-          # import was refused for, and this step's own output is public.
-          deadline=$(( SECONDS + 35 * 60 ))
-          while [ "$SECONDS" -lt "$deadline" ]; do
-            status=$(curl --silent --show-error --fail-with-body \
-              --header "PRIVATE-TOKEN: $READ_TOKEN" \
-              "$PROJECT_API/pipelines/$PIPELINE" | jq -r .status)
-            case "$status" in
-              success)                     echo "status=success" >> "$GITHUB_OUTPUT"; exit 0 ;;
-              failed|canceled|skipped)     echo "status=$status"  >> "$GITHUB_OUTPUT"; exit 0 ;;
-            esac
-            sleep 20
-          done
-          echo "status=timeout" >> "$GITHUB_OUTPUT"
+          gh pr comment "$PR" --body "$(cat <<'EOF'
+          Queued for internal import. Development happens in an internal repository, so this change will be imported there, reviewed, and merged — then replayed onto this mirror.
 
-      # Only once the pipeline actually started: a failure before that is the
-      # maintainer's own mistake (a closed pull request, a missing secret) and
-      # putting it in front of the contributor explains nothing.
-      - name: Report the outcome
-        if: always() && steps.trigger.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ inputs.pr }}
-          STATUS: ${{ steps.poll.outputs.status }}
-        run: |
-          set -euo pipefail
-          case "${STATUS:-error}" in
-            success)
-              body="Imported for internal testing. The change will be reviewed and merged internally, and this pull request will be closed with a link to the published commit once it lands." ;;
-            *)
-              body="Import refused. A maintainer will follow up here — there is nothing to do on this pull request in the meantime." ;;
-          esac
-          gh pr comment "$PR" --body "$body"
-
-      # After the comment, so the contributor is told either way. The polling
-      # step exits 0 on a red pipeline on purpose -- reporting comes first, and
-      # this is what makes the run itself red for the maintainer.
-      - name: Fail the run if the import did not succeed
-        if: steps.poll.outputs.status != 'success'
-        run: |
-          echo "::error::internal import ended as ${{ steps.poll.outputs.status }}; the reason is in the internal log"
-          exit 1
+          When it lands, this pull request will close automatically with a link to the published commit. If the import cannot proceed, a maintainer will follow up here; the internal side has no way to write to this pull request, so silence means it is still in the queue rather than that something failed.
+          EOF
+          )"
