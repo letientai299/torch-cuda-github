@@ -81,3 +81,5 @@ Third-commit squash test, step 3.
 <!-- o1: a single-commit change on a published path -->
 
 <!-- o13 catch-up probe -->
+
+<!-- a4: internal change published over a mirror-side commit -->
