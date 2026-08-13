@@ -32,3 +32,8 @@ def fused_scale_add(
     from torch_cuda.dsl_kernels.triton.elementwise import triton_fused_scale_add
 
     return triton_fused_scale_add(x.contiguous(), y.contiguous(), alpha)
+
+
+def scaled_sum(x: float, y: float) -> float:
+    """Return ``x + y``, formatted the way ruff wants it."""
+    return x + y
