@@ -67,3 +67,5 @@ Third-commit squash test, step 3.
 <!-- outbound 7: ticket key in the published subject -->
 
 <!-- i2: labelled but unapproved -->
+
+<!-- i3: pushed after approval -->
