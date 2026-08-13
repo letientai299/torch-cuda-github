@@ -69,3 +69,5 @@ Third-commit squash test, step 3.
 <!-- i2: labelled but unapproved -->
 
 <!-- i3: pushed after approval -->
+
+<!-- i7: a second approved commit -->
