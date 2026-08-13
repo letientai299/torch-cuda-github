@@ -43,6 +43,11 @@ def _check_operands(a: torch.Tensor, b: torch.Tensor) -> None:
         raise ValueError(f"shape mismatch: {tuple(a.shape)} vs {tuple(b.shape)}")
     if a.dtype != b.dtype:
         raise ValueError(f"dtype mismatch: {a.dtype} vs {b.dtype}")
+    # Backend selection resolves from `a.device` alone, so a `b` on another
+    # device reaches the kernel and fails as a pointer complaint that names
+    # neither operand.
+    if a.device != b.device:
+        raise ValueError(f"device mismatch: {a.device} vs {b.device}")
     # The kernels index a flat buffer, so a non-contiguous input would read the
     # wrong elements rather than fail loudly.
     if not (a.is_contiguous() and b.is_contiguous()):
