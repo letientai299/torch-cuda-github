@@ -12,6 +12,11 @@ mirror using a representative technology mix: PyTorch ops in front,
 The point is the plumbing, not the math — every op is elementwise and has an
 eager reference.
 
+## TODO
+
+- Config leaks protection, can't force push to `main` in real repo to fix the
+  leaks.
+
 ## Install
 
 ```sh
@@ -56,7 +61,7 @@ request.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/coding.md](docs/coding.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [`docs/coding.md`](docs/coding.md).
 Style is enforced by [prek][prek]; install the hooks once with
 `prek install -t pre-commit -t commit-msg`.
 
