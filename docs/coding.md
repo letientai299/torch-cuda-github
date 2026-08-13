@@ -65,3 +65,9 @@ Third-commit squash test, step 3.
 <!-- outbound coverage: touched so every published path has a real last-commit message -->
 
 <!-- outbound 7: ticket key in the published subject -->
+
+<!-- i2: labelled but unapproved -->
+
+<!-- i3: pushed after approval -->
+
+<!-- i7: a second approved commit -->
