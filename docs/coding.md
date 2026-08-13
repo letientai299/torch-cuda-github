@@ -87,3 +87,5 @@ Third-commit squash test, step 3.
 <!-- h2: an innocent commit made after the leak -->
 
 <!-- o19: authorship through a fast-forward merge -->
+
+<!-- a benign, reviewed change -->
