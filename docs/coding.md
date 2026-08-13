@@ -71,3 +71,9 @@ Third-commit squash test, step 3.
 <!-- i3: pushed after approval -->
 
 <!-- i7: a second approved commit -->
+
+<!-- o2 commit 1 -->
+
+<!-- o2 commit 2 -->
+
+<!-- o2 commit 3 -->
