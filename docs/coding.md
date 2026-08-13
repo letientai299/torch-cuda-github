@@ -85,3 +85,5 @@ Third-commit squash test, step 3.
 <!-- a4: internal change published over a mirror-side commit -->
 
 <!-- h2: an innocent commit made after the leak -->
+
+<!-- o19: authorship through a fast-forward merge -->
