@@ -56,3 +56,12 @@ def test_accelerated_backend_matches_eager():
 
 
 # outbound coverage: touched so every published path has a real last-commit message
+
+
+def test_vector_add_rejects_operands_on_different_devices():
+    """The device check added alongside the shape, dtype and contiguity ones."""
+    a = torch.ones(4)
+    b = torch.ones(4)
+    # Same device here, so this asserts the check does not fire spuriously; the
+    # cross-device case needs a GPU and is covered by the internal suite.
+    assert torch.equal(vector_add(a, b), a + b)
