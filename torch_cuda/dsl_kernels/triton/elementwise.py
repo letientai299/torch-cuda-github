@@ -45,6 +45,3 @@ def triton_fused_scale_add(x: torch.Tensor, y: torch.Tensor, alpha: float) -> to
 
 def _grid(n_elements: int) -> tuple[int, ...]:
     return (triton.cdiv(n_elements, BLOCK_SIZE),)
-
-
-# a comment added inside the published tree instead

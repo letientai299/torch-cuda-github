@@ -65,27 +65,3 @@ Third-commit squash test, step 3.
 <!-- outbound coverage: touched so every published path has a real last-commit message -->
 
 <!-- outbound 7: ticket key in the published subject -->
-
-<!-- i2: labelled but unapproved -->
-
-<!-- i3: pushed after approval -->
-
-<!-- i7: a second approved commit -->
-
-<!-- o2 commit 1 -->
-
-<!-- o2 commit 2 -->
-
-<!-- o2 commit 3 -->
-
-<!-- o1: a single-commit change on a published path -->
-
-<!-- o13 catch-up probe -->
-
-<!-- a4: internal change published over a mirror-side commit -->
-
-<!-- h2: an innocent commit made after the leak -->
-
-<!-- o19: authorship through a fast-forward merge -->
-
-<!-- a benign, reviewed change -->
